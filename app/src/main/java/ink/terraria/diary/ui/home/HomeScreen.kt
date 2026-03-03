@@ -1,0 +1,249 @@
+package ink.terraria.diary.ui.home
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Card
+import androidx.compose.material3.Divider
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
+import ink.terraria.diary.DiaryBookAppBar
+import ink.terraria.diary.R
+import ink.terraria.diary.data.Diary
+import ink.terraria.diary.ui.AppViewModelProvider
+import ink.terraria.diary.ui.navigation.NavigationDestination
+import java.util.Date
+
+object HomeDestination : NavigationDestination {
+    override val route: String = "home"
+    override val titleRes: Int = R.string.app_name
+}
+
+@Composable
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.factory)
+) {
+    val uiState by viewModel.homeUiState.collectAsState()
+    Scaffold(
+        topBar = {
+            DiaryBookAppBar(stringResource(HomeDestination.titleRes))
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = {
+
+                },
+                modifier = Modifier.padding(bottom = 32.dp),
+            ) {
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_diary))
+                Text(
+                    text = stringResource(R.string.add_diary),
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+        },
+        floatingActionButtonPosition = FabPosition.End,
+        modifier = Modifier
+    ) { paddingValues ->
+        HomeBody(
+            diaries = uiState.diaries,
+            modifier = modifier
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .fillMaxWidth()
+        )
+    }
+}
+
+@Composable
+fun HomeBody(
+    diaries: List<Diary>,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
+        if (diaries.isEmpty()) {
+            Spacer(Modifier.padding(top = 32.dp))
+            Text(
+                text =
+                    stringResource(R.string.empty_diary_book),
+                style = MaterialTheme.typography.displayMedium
+            )
+
+        } else {
+            DiaryList(diaries)
+        }
+    }
+
+
+}
+
+@Composable
+fun DiaryList(diaries: List<Diary>, modifier: Modifier = Modifier) {
+    LazyColumn(modifier = modifier) {
+        items(diaries) { diary ->
+            Diary(diary, modifier = Modifier.padding(8.dp))
+        }
+    }
+
+}
+
+@Composable
+fun Diary(diary: Diary, modifier: Modifier = Modifier) {
+    Card(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            val formattedDate = java.text.SimpleDateFormat(
+                stringResource(R.string.local_datetime),
+                java.util.Locale.CHINA
+            ).format(diary.date)
+            var contentPreview = diary.content
+            if (diary.content.length > 50) {
+                contentPreview = diary.content.take(50) + "..."
+            }
+
+
+            Text(
+                text = diary.title,
+                style = MaterialTheme.typography.headlineMedium
+            )
+            
+            Text(
+                text = formattedDate,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+            Text(
+                text = contentPreview,
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+
+        }
+    }
+
+}
+
+@Preview
+@Composable
+fun DiaryBodyReview() {
+    val diaries = listOf(
+        Diary(
+            0,
+            "原神",
+            "你说的对，但是《原神》是由米哈游自主研发的一款全新开放世界冒险游戏。" +
+                    "游戏发生在一个被称作「提瓦特」的幻想世界，在这里，被神选中的人将被授予「神之眼」，导引元素之力。" +
+                    "你将扮演一位名为「旅行者」的神秘角色，在自由的旅行中邂逅性格各异、能力独特的同伴们，和他们一起击败强敌，找回失散的亲人——同时，逐步发掘「原神」的真相。\n\n" +
+                    "因为你的素养很差，我现在每天玩原神都能赚150原石，每个月差不多5000原石的收入， 也就是现实生活中每个月5000美元的收入水平，换算过来最少也30000人民币，" +
+                    "虽然我只有14岁，但是已经超越了中国绝大多数人(包括你)的水平，这便是原神给我的骄傲的资本。\n\n" +
+                    "毫不夸张地说，《原神》是miHoYo迄今为止规模最为宏大，也是最具野心的一部作品。" +
+                    "即便在经历了8700个小时的艰苦战斗后，游戏还有许多尚未发现的秘密，错过的武器与装备，以及从未使用过的法术和技能。\n\n" +
+                    "尽管游戏中的战斗体验和我们之前在烧机系列游戏所见到的没有多大差别，但游戏中各类精心设计的敌人以及Boss战已然将战斗抬高到了一个全新的水平。" +
+                    "就和几年前的《塞尔达传说》一样，《原神》也是一款能够推动同类游戏向前发展的优秀作品。",
+            imageUrl = "",
+            localPath = "",
+            weather = "晴",
+            latitude = 0.0,
+            longitude = 0.0,
+            date = Date()
+        ),
+        Diary(
+            1,
+            "崩坏：星穹铁道",
+            "你说的对，但是《崩坏：星穹铁道》是由米哈游自主研发的一款全新银河冒险策略游戏。" +
+                    "你将登上星穹列车，造访寓居宇宙的万象世界，探寻「星神」的痕迹，解决「星核」引发的纷争。\n\n" +
+                    "因为你的逻辑感很差，我现在每天在模拟宇宙刷怪都能赚150星琼，一个月躺平拿一张金卡，相当于现实中拥有华尔街精英的理财水平。" +
+                    "虽然我只会按自动战斗，但我的策略思维已经超越了大多数人类（包括你），这便是阿基维利给我的骄傲的资本。\n\n" +
+                    "即便在经历了5000次巡猎副本后，游戏仍有未解的星神之谜。它不仅是一款回合制游戏，更是能够推动人类文明向星际迈进的伟大杰作。",
+            imageUrl = "",
+            weather = "多云",
+            localPath = "",
+            latitude = 0.0,
+            longitude = 0.0,
+            date = Date()
+        ),
+        Diary(
+            2,
+            "鸣潮",
+            "你说的对，但是《鸣潮》是由库洛游戏自主研发的一款高自由度动作手游。" +
+                    "在这个名为「悲鸣」过后的时代，你作为「漂泊者」在苏醒的荒原上邂逅共鸣者伴侣。\n\n" +
+                    "因为你的操作手感很差，我现在每天在索拉等级8锄大地，声骸全副词条双爆，换算成现实资产起码坐拥三座矿山。" +
+                    "虽然我还没毕业，但我的动作模组理解已经达到了动作游戏天花板的水平，这便是弹刀和极限闪避给我的骄傲资本。\n\n" +
+                    "《鸣潮》是库洛最具野心的作品，它不仅是在做游戏，而是在重塑动作游戏的工业标准。如果你觉得不好玩，那一定是你的声骸词条不够完美。",
+            imageUrl = "",
+            weather = "阵雨",
+            localPath = "",
+            latitude = 0.0,
+            longitude = 0.0,
+            date = Date()
+        ),
+        Diary(
+            3,
+            "绝区零",
+            "你说的对，但是《绝区零》是由米哈游自主研发的一款全新动作游戏。" +
+                    "故事发生在被超自然灾害「空洞」摧毁的现代文明遗迹——新艾利都。\n\n" +
+                    "因为你的节奏感很差，我现在每天在录像店吹着空调就能赚150菲林，也就是现实中每天领2000元高温补贴的水平。" +
+                    "虽然我只是个绳匠，但我处理空洞委托的效率已经超越了治安局的专业人士（包括你），这便是这种潮酷画风给我的骄傲资本。\n\n" +
+                    "这不仅仅是一次走格子，这是一场视听感官的核爆。即便在经历了1000小时的受击反馈测试后，我依然沉迷于那种打击感不能自拔。",
+            imageUrl = "",
+            weather = "晴",
+            localPath = "",
+            latitude = 0.0,
+            longitude = 0.0,
+            date = Date()
+        ),
+        Diary(
+            4,
+            "明日方舟：终末地",
+            "你说的对，但是《明日方舟：终末地》是由鹰角网络自主研发的一款 3D 即时策略 RPG。" +
+                    "在名为「塔卫二」的行星上，你将带领协议回收部门，开拓这片未知荒野。\n\n" +
+                    "因为你的基建规划能力很差，我现在每天在塔卫二拉电线管路都能产出150合成玉，也就是现实中高级集成电路工程师的年薪水平。" +
+                    "虽然行星表面危机四伏，但我的集成化工业体系已经超越了人类目前的基建极限，这便是集成战略带给我的骄傲资本。\n\n" +
+                    "它是对自动化的极致探索。正如当年的工业革命一样，《终末地》是一款能够推动玩家大脑升级的划时代神作。",
+            imageUrl = "",
+            weather = "阴",
+            localPath = "",
+            date = Date(),
+            latitude = 0.0,
+            longitude = 0.0,
+        )
+    )
+
+
+    HomeBody(diaries)
+
+}

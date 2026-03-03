@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">日记</string>
+    <string name="empty_diary_book">要不写点什么?</string>
+    <string name="local_datetime">yyyy年MM月dd日 HH:mm"</string>
+    <string name="delete_diary">删除日记</string>
+    <string name="delete_diary_message">真的要删除这篇日记吗?</string>
+    <string name="delete">删除</string>
+    <string name="cancel">取消</string>
+    <string name="diary_title_hint">标题</string>
+    <string name="diary_content_hint">内容</string>
+    <string name="save">保存</string>
+    <string name="edit_diary">编辑日记</string>
+    <string name="add_diary">添加日记</string>
+</resources>
