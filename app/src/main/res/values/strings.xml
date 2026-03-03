@@ -11,4 +11,10 @@
     <string name="save">保存</string>
     <string name="edit_diary">编辑日记</string>
     <string name="add_diary">添加日记</string>
+    <string name="diary_deleted">日记已删除</string>
+    <string name="diary_saved">日记已保存</string>
+    <string name="diary">日记</string>
+    <string name="title">标题</string>
+    <string name="content">内容</string>
+    <string name="content_tip">要不写点什么?"</string>
 </resources>

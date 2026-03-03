@@ -9,7 +9,7 @@ class LocalDiaryRepository(private val diaryDao: DiaryDao): DiaryRepository {
 
     override suspend fun deleteDiary(diary: Diary) = diaryDao.delete(diary)
 
-    override fun getDiaryStream(id: Int): Flow<Diary> = diaryDao.getDiary(id)
+    override fun getDiary(id: Int): Diary = diaryDao.getDiary(id)
 
     override fun getAllDairiesStream(): Flow<List<Diary>> = diaryDao.getAllDairies()
 }

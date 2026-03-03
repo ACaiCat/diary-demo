@@ -9,7 +9,7 @@ interface DiaryRepository {
 
     suspend fun deleteDiary(diary: Diary)
 
-    fun getDiaryStream(id: Int): Flow<Diary>
+    fun getDiary(id: Int): Diary
 
     fun getAllDairiesStream(): Flow<List<Diary>>
 }

@@ -1,10 +1,9 @@
 package ink.terraria.diary.ui.home
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -14,15 +13,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
-import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -32,7 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ink.terraria.diary.DiaryBookAppBar
 import ink.terraria.diary.R
@@ -48,6 +43,8 @@ object HomeDestination : NavigationDestination {
 
 @Composable
 fun HomeScreen(
+    navigateToDiaryDetail: (diaryId: Int) -> Unit,
+    navigateToNewDiary: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.factory)
 ) {
@@ -58,9 +55,7 @@ fun HomeScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = {
-
-                },
+                onClick = navigateToNewDiary,
                 modifier = Modifier.padding(bottom = 32.dp),
             ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.add_diary))
@@ -76,6 +71,7 @@ fun HomeScreen(
     ) { paddingValues ->
         HomeBody(
             diaries = uiState.diaries,
+            onDiaryClicked = navigateToDiaryDetail,
             modifier = modifier
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
@@ -87,6 +83,7 @@ fun HomeScreen(
 @Composable
 fun HomeBody(
     diaries: List<Diary>,
+    onDiaryClicked: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
@@ -99,7 +96,10 @@ fun HomeBody(
             )
 
         } else {
-            DiaryList(diaries)
+            DiaryList(
+                diaries = diaries,
+                onDiaryClicked = onDiaryClicked
+            )
         }
     }
 
@@ -107,18 +107,33 @@ fun HomeBody(
 }
 
 @Composable
-fun DiaryList(diaries: List<Diary>, modifier: Modifier = Modifier) {
+fun DiaryList(
+    diaries: List<Diary>,
+    onDiaryClicked: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
     LazyColumn(modifier = modifier) {
         items(diaries) { diary ->
-            Diary(diary, modifier = Modifier.padding(8.dp))
+            Diary(
+                diary = diary,
+                onDiaryClicked = onDiaryClicked,
+                modifier = Modifier.padding(8.dp)
+            )
         }
     }
 
 }
 
 @Composable
-fun Diary(diary: Diary, modifier: Modifier = Modifier) {
-    Card(modifier = modifier) {
+fun Diary(
+    diary: Diary,
+    onDiaryClicked: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.clickable(
+            onClick = { onDiaryClicked(diary.id) }
+        )) {
         Column(
             modifier = Modifier
                 .padding(16.dp),
@@ -138,7 +153,7 @@ fun Diary(diary: Diary, modifier: Modifier = Modifier) {
                 text = diary.title,
                 style = MaterialTheme.typography.headlineMedium
             )
-            
+
             Text(
                 text = formattedDate,
                 style = MaterialTheme.typography.labelMedium,
@@ -177,8 +192,6 @@ fun DiaryBodyReview() {
             imageUrl = "",
             localPath = "",
             weather = "晴",
-            latitude = 0.0,
-            longitude = 0.0,
             date = Date()
         ),
         Diary(
@@ -192,8 +205,6 @@ fun DiaryBodyReview() {
             imageUrl = "",
             weather = "多云",
             localPath = "",
-            latitude = 0.0,
-            longitude = 0.0,
             date = Date()
         ),
         Diary(
@@ -207,8 +218,6 @@ fun DiaryBodyReview() {
             imageUrl = "",
             weather = "阵雨",
             localPath = "",
-            latitude = 0.0,
-            longitude = 0.0,
             date = Date()
         ),
         Diary(
@@ -222,8 +231,6 @@ fun DiaryBodyReview() {
             imageUrl = "",
             weather = "晴",
             localPath = "",
-            latitude = 0.0,
-            longitude = 0.0,
             date = Date()
         ),
         Diary(
@@ -238,12 +245,10 @@ fun DiaryBodyReview() {
             weather = "阴",
             localPath = "",
             date = Date(),
-            latitude = 0.0,
-            longitude = 0.0,
         )
     )
 
 
-    HomeBody(diaries)
+    HomeBody(diaries, {})
 
 }
