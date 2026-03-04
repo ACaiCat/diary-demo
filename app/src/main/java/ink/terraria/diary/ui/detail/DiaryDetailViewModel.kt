@@ -20,7 +20,7 @@ class DiaryDetailViewModel(
     var newDiary: Boolean = checkNotNull(savedStateHandle[DiaryDetailDestination.newDiaryArg])
 
     var uiState by mutableStateOf(
-        if (newDiary) DiaryDetailUiState(editing = true) else DiaryDetailUiState()
+        if (newDiary) DiaryDetailUiState(editing = true, newDiary = true) else DiaryDetailUiState()
     )
         private set
 
