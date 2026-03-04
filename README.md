@@ -4,6 +4,12 @@
 
 ## 截图
 
+![0fd09e75986d2945cacc70656b67e1e9_720](https://github.com/user-attachments/assets/2725a676-8471-4b35-836f-f3fff49df300)
+
+
+![823d2b93bcd05314535867ff4d2d4cba](https://github.com/user-attachments/assets/e4606440-b728-478a-9cb8-36d5f74d4b34)
+
+
 ## 构建配置
 
 构建前，在项目根目录的 `local.properties` 文件中添加以下内容：
