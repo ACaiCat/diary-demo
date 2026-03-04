@@ -82,7 +82,6 @@ fun HomeScreen(
         HomeBody(
             diaries = uiState.diaries,
             onDiaryClicked = navigateToDiaryDetail,
-            isLoading = uiState.loading,
             query = searchQuery,
             onQueryChange = viewModel::updateSearchQuery,
             modifier = modifier
@@ -96,7 +95,6 @@ fun HomeScreen(
 @Composable
 fun HomeBody(
     diaries: List<Diary>,
-    isLoading: Boolean,
     onDiaryClicked: (Int) -> Unit,
     query: String,
     onQueryChange: (String) -> Unit,
@@ -111,13 +109,6 @@ fun HomeBody(
                 query = query,
                 onQueryChange = onQueryChange,
             )
-            if (diaries.isEmpty() && !isLoading && query.isEmpty()) {
-                Spacer(Modifier.padding(top = 32.dp))
-                Text(
-                    text = stringResource(R.string.empty_diary_book),
-                    style = MaterialTheme.typography.displayMedium
-                )
-            }
         }
 
         items(diaries) { diary ->
@@ -255,7 +246,6 @@ fun HomeBar(
 fun DiaryBodyReview() {
     HomeBody(
         diaries = diaries,
-        isLoading = false,
         query = "",
         onQueryChange = {},
         onDiaryClicked = {}

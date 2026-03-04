@@ -27,7 +27,7 @@ class HomeViewModel(diaryRepository: DiaryRepository) : ViewModel() {
             it.title.contains(query, ignoreCase = true) ||
             it.content.contains(query, ignoreCase = true)
         }
-        HomeUiState(diaries = filtered, loading = false)
+        HomeUiState(diaries = filtered)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000L),
@@ -41,5 +41,4 @@ class HomeViewModel(diaryRepository: DiaryRepository) : ViewModel() {
 
 data class HomeUiState(
     val diaries: List<Diary> = listOf(),
-    var loading: Boolean = true
 )
