@@ -108,7 +108,7 @@ fun HomeBody(
                 query = query,
                 onQueryChange = onQueryChange,
             )
-            if (diaries.isEmpty() && !isLoading && !query.isEmpty()) {
+            if (diaries.isEmpty() && !isLoading && query.isEmpty()) {
                 Spacer(Modifier.padding(top = 32.dp))
                 Text(
                     text = stringResource(R.string.empty_diary_book),
@@ -230,6 +230,7 @@ fun HomeBar(
     modifier: Modifier = Modifier
 ) {
     TopAppBar(
+        modifier = modifier,
         title = {
             Column {
                 Text(
