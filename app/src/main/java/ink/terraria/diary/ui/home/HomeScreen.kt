@@ -127,7 +127,7 @@ fun DiaryList(
             Diary(
                 diary = diary,
                 onDiaryClicked = onDiaryClicked,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(12.dp)
             )
         }
     }

@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ink.terraria.diary.data.Diary
 import ink.terraria.diary.data.DiaryRepository
-import ink.terraria.diary.network.WeatherApi
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -58,7 +57,7 @@ class DiaryDetailViewModel(
     fun validateInput(diary: Diary): Boolean {
         return diary.title.isNotBlank() && diary.content.isNotBlank()
     }
-    
+
     fun showDatePicker(show: Boolean) {
         uiState = uiState.copy(showDatePicker = show)
     }

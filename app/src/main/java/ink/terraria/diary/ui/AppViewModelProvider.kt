@@ -16,7 +16,10 @@ object AppViewModelProvider {
         }
 
         initializer {
-            DiaryDetailViewModel(DiaryBookApplication().appContainer.diaryRepository, this.createSavedStateHandle())
+            DiaryDetailViewModel(
+                DiaryBookApplication().appContainer.diaryRepository,
+                this.createSavedStateHandle()
+            )
         }
 
     }

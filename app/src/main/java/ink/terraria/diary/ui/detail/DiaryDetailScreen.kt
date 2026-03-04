@@ -2,10 +2,8 @@ package ink.terraria.diary.ui.detail
 
 import android.Manifest
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -18,23 +16,20 @@ import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.InsertPhoto
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,19 +38,15 @@ import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TooltipAnchorPosition
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -71,8 +62,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import ink.terraria.diary.R
 import ink.terraria.diary.data.Diary
-import ink.terraria.diary.isHttpUrl
-import ink.terraria.diary.network.Now
 import ink.terraria.diary.network.WeatherApi
 import ink.terraria.diary.toLocalString
 import ink.terraria.diary.ui.AppViewModelProvider
@@ -97,69 +86,12 @@ fun DiaryDetailScreen(
 ) {
     val uiState = viewModel.uiState
     val context = LocalContext.current
-    val weatherLangCode = stringResource(R.string.weather_lang_code)
-    val weatherAutoFetchedText = stringResource(R.string.weather_auto_fetched)
-
-    if (viewModel.newDiary) {
-        val hasLocationPermission = remember {
-            mutableStateOf(
-                ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            )
-        }
-        val launcher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestPermission()
-        ) { granted ->
-            if (granted) {
-                hasLocationPermission.value = true
-            }
-        }
-        LaunchedEffect(hasLocationPermission.value) {
-            if (!hasLocationPermission.value) {
-                launcher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
-                return@LaunchedEffect
-            }
-            val locationManager =
-                context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            if (ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                return@LaunchedEffect
-            }
-            try {
-                val location =
-                    locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-                        ?: locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                        ?: locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
-                if (location != null) {
-                    val weatherResponse = WeatherApi.weatherApiService.getCurrentWeather(
-                        "${"%.2f".format(location.longitude)},${"%.2f".format(location.latitude)}",
-                        weatherLangCode
-                    )
-                    val weatherText = weatherResponse.now.text
-                    viewModel.updateUiState(uiState.diary.copy(weather = weatherText))
-                    Toast.makeText(
-                        context,
-                        weatherAutoFetchedText.format(weatherText),
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
+    if (uiState.newDiary) {
+        TryGetWeather(context, viewModel)
     }
 
     Scaffold(
-        modifier = modifier,
-        topBar = {
+        modifier = modifier, topBar = {
             DetailTopBar(
                 uiState = uiState,
                 onSaveClick = { viewModel.saveDiary(uiState.diary) },
@@ -206,10 +138,61 @@ fun DiaryDetailScreen(
                     start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
                     end = paddingValues.calculateEndPadding(LocalLayoutDirection.current),
                 )
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 24.dp)
         )
 
 
+    }
+}
+
+@Composable
+fun TryGetWeather(context: Context, viewModel: DiaryDetailViewModel) {
+    val weatherLangCode = stringResource(R.string.weather_lang_code)
+    val hasLocationPermission = remember {
+        mutableStateOf(
+            ActivityCompat.checkSelfPermission(
+                context, Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (granted) {
+            hasLocationPermission.value = true
+        }
+    }
+    LaunchedEffect(hasLocationPermission.value) {
+        if (!hasLocationPermission.value) {
+            launcher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+            return@LaunchedEffect
+        }
+        val locationManager =
+            context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if (ActivityCompat.checkSelfPermission(
+                context, Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                context, Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return@LaunchedEffect
+        }
+        try {
+            val location =
+                locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+                    ?: locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                    ?: locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
+            if (location != null) {
+                val weatherResponse = WeatherApi.weatherApiService.getCurrentWeather(
+                    "${"%.2f".format(location.longitude)},${"%.2f".format(location.latitude)}",
+                    weatherLangCode
+                )
+                val weatherText = weatherResponse.now.text
+                viewModel.updateUiState(viewModel.uiState.diary.copy(weather = weatherText))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }
 
@@ -226,72 +209,59 @@ fun DetailTopBar(
     modifier: Modifier = Modifier
 ) {
 
-    TopAppBar(
-        modifier = modifier,
-        title = {},
-        navigationIcon = {
-            TooltipBox(
-                TooltipDefaults.rememberTooltipPositionProvider(
-                    TooltipAnchorPosition.Above
-                ),
-                tooltip = {
-                    PlainTooltip { Text(stringResource(R.string.back)) }
-                },
-                state = rememberTooltipState()
+    TopAppBar(modifier = modifier, title = {}, navigationIcon = {
+        TooltipBox(
+            TooltipDefaults.rememberTooltipPositionProvider(
+                TooltipAnchorPosition.Above
+            ), tooltip = {
+                PlainTooltip { Text(stringResource(R.string.back)) }
+            }, state = rememberTooltipState()
+        ) {
+            IconButton(
+                onClick = navigationBack
             ) {
-                IconButton(
-                    onClick = navigationBack
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = stringResource(R.string.back)
-                    )
-                }
-            }
-        },
-        actions = {
-            if (uiState.editing) {
-                IconButton(onClick = onInsertPhotoClick) {
-                    Icon(
-                        imageVector = Icons.Default.InsertPhoto,
-                        contentDescription = stringResource(R.string.insert_photo)
-                    )
-                }
-                IconButton(onClick = onSelectDateClick) {
-                    Icon(
-                        imageVector = Icons.Default.DateRange,
-                        contentDescription = stringResource(R.string.select_date)
-                    )
-                }
-                IconButton(onClick = onPickWeatherClick) {
-                    Icon(
-                        imageVector = Icons.Default.WbSunny,
-                        contentDescription = stringResource(R.string.weather)
-                    )
-                }
-
-                IconButton(onClick = onSaveClick, enabled = uiState.canSave) {
-                    Icon(
-                        imageVector = Icons.Default.Save,
-                        contentDescription = stringResource(R.string.edit)
-                    )
-                }
-            } else {
-                IconButton(onClick = onEditClick) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = stringResource(R.string.edit)
-                    )
-                }
-            }
-            IconButton(onClick = {}) {
                 Icon(
-                    imageVector = Icons.Default.MoreVert,
+                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
                     contentDescription = stringResource(R.string.back)
                 )
             }
         }
-    )
+    }, actions = {
+        if (uiState.editing) {
+            IconButton(onClick = onInsertPhotoClick) {
+                Icon(
+                    imageVector = Icons.Default.InsertPhoto,
+                    contentDescription = stringResource(R.string.insert_photo)
+                )
+            }
+            IconButton(onClick = onSelectDateClick) {
+                Icon(
+                    imageVector = Icons.Default.DateRange,
+                    contentDescription = stringResource(R.string.select_date)
+                )
+            }
+            IconButton(onClick = onPickWeatherClick) {
+                Icon(
+                    imageVector = Icons.Default.WbSunny,
+                    contentDescription = stringResource(R.string.weather)
+                )
+            }
+
+            IconButton(onClick = onSaveClick, enabled = uiState.canSave) {
+                Icon(
+                    imageVector = Icons.Default.Save,
+                    contentDescription = stringResource(R.string.edit)
+                )
+            }
+        } else {
+            IconButton(onClick = onEditClick) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = stringResource(R.string.edit)
+                )
+            }
+        }
+    })
 
 }
 
@@ -351,9 +321,7 @@ fun DiaryDetailBody(
 
 @Composable
 fun DiaryEditField(
-    uiState: DiaryDetailUiState,
-    onDiaryChange: (Diary) -> Unit,
-    modifier: Modifier = Modifier
+    uiState: DiaryDetailUiState, onDiaryChange: (Diary) -> Unit, modifier: Modifier = Modifier
 ) {
 
     Column(
@@ -371,7 +339,8 @@ fun DiaryEditField(
             singleLine = true,
             minLines = 1,
             maxLines = 1,
-            textStyle = MaterialTheme.typography.headlineMedium,
+
+            textStyle = MaterialTheme.typography.headlineMedium.copy(color = MaterialTheme.colorScheme.onSurface),
             enabled = uiState.editing,
             decorationBox = { innerTextField ->
                 Box {
@@ -384,8 +353,7 @@ fun DiaryEditField(
                     }
                     innerTextField()
                 }
-            }
-        )
+            })
 
         Row {
             Text(
@@ -418,7 +386,7 @@ fun DiaryEditField(
             singleLine = false,
             minLines = 1,
             maxLines = Int.MAX_VALUE,
-            textStyle = MaterialTheme.typography.bodyLarge,
+            textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
             enabled = uiState.editing,
             decorationBox = { innerTextField ->
                 Box {
@@ -431,8 +399,7 @@ fun DiaryEditField(
                     }
                     innerTextField()
                 }
-            }
-        )
+            })
 
         DiaryPhoto(
             uiState = uiState,
@@ -446,16 +413,13 @@ fun DiaryEditField(
 
 @Composable
 fun DiaryPhoto(
-    uiState: DiaryDetailUiState,
-    onDiaryChange: (Diary) -> Unit,
-    modifier: Modifier = Modifier
+    uiState: DiaryDetailUiState, onDiaryChange: (Diary) -> Unit, modifier: Modifier = Modifier
 ) {
     val showPhotoDeleteAlert = remember(uiState.diary.id) { mutableStateOf(false) }
 
     if (!uiState.diary.imageUrl.isEmpty() || !uiState.diary.imagePath.isEmpty()) {
         Box(
-            modifier = modifier
-                .fillMaxWidth()
+            modifier = modifier.fillMaxWidth()
         ) {
             AsyncImage(
                 model = uiState.diary.imageUrl.ifEmpty { uiState.diary.imagePath },
@@ -472,13 +436,11 @@ fun DiaryPhoto(
                 IconButton(
                     onClick = {
                         showPhotoDeleteAlert.value = true
-                    },
-                    modifier = Modifier
+                    }, modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(4.dp)
                         .background(
-                            color = MaterialTheme.colorScheme.errorContainer,
-                            shape = CircleShape
+                            color = MaterialTheme.colorScheme.errorContainer, shape = CircleShape
                         )
                 ) {
                     Icon(
@@ -513,8 +475,7 @@ fun DiaryPhoto(
                 }) {
                     Text(stringResource(R.string.cancel))
                 }
-            }
-        )
+            })
     }
 }
 
@@ -528,6 +489,5 @@ fun DetailTopBarPreview() {
         onSelectDateClick = {},
         onInsertPhotoClick = {},
         navigationBack = {},
-        onPickWeatherClick = {}
-    )
+        onPickWeatherClick = {})
 }

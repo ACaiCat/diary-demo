@@ -2,7 +2,7 @@ package ink.terraria.diary.data
 
 import kotlinx.coroutines.flow.Flow
 
-class LocalDiaryRepository(private val diaryDao: DiaryDao): DiaryRepository {
+class LocalDiaryRepository(private val diaryDao: DiaryDao) : DiaryRepository {
     override suspend fun insertDiary(diary: Diary) = diaryDao.insert(diary)
 
     override suspend fun updateDiary(diary: Diary) = diaryDao.update(diary)

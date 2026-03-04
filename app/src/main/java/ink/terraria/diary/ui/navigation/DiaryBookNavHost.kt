@@ -1,5 +1,7 @@
 package ink.terraria.diary.ui.navigation
 
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -8,7 +10,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import ink.terraria.diary.ui.detail.DiaryDetailBody
 import ink.terraria.diary.ui.detail.DiaryDetailDestination
 import ink.terraria.diary.ui.detail.DiaryDetailScreen
 import ink.terraria.diary.ui.home.HomeDestination
@@ -24,7 +25,13 @@ fun DiaryBookNavHost(
         startDestination = HomeDestination.route,
         modifier = modifier
     ) {
-        composable(route = HomeDestination.route) {
+        composable(
+            route = HomeDestination.route,
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
+        ) {
             HomeScreen(
                 modifier = Modifier.fillMaxSize(),
                 navigateToNewDiary = {
@@ -44,7 +51,11 @@ fun DiaryBookNavHost(
                 navArgument(DiaryDetailDestination.newDiaryArg) {
                     type = NavType.BoolType
                 }
-            )) {
+            ),
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) }) {
             DiaryDetailScreen(
                 modifier = Modifier.fillMaxSize(),
                 navigationBack = {
