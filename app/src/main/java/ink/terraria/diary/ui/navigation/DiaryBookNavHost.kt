@@ -46,7 +46,10 @@ fun DiaryBookNavHost(
                 }
             )) {
             DiaryDetailScreen(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                navigationBack = {
+                    navController.popBackStack()
+                }
             )
         }
     }

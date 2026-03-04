@@ -8,11 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ink.terraria.diary.data.Diary
 import ink.terraria.diary.data.DiaryRepository
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -24,14 +19,19 @@ class DiaryDetailViewModel(
     val diaryId: Int = checkNotNull(savedStateHandle[DiaryDetailDestination.diaryIdArg])
     var newDiary: Boolean = checkNotNull(savedStateHandle[DiaryDetailDestination.newDiaryArg])
 
-    private val diaryDetailUiState = if (newDiary) {
-        DiaryDetailUiState()
-    } else {
-        DiaryDetailUiState(diaryRepository.getDiary(diaryId))
-    }
-
-    var uiState by mutableStateOf(diaryDetailUiState)
+    var uiState by mutableStateOf(
+        if (newDiary) DiaryDetailUiState(editing = true) else DiaryDetailUiState()
+    )
         private set
+
+    init {
+        if (!newDiary) {
+            viewModelScope.launch {
+                val diary = diaryRepository.getDiary(diaryId)
+                uiState = uiState.copy(diary = diary, canSave = validateInput(diary))
+            }
+        }
+    }
 
     fun saveDiary(diary: Diary) {
         viewModelScope.launch {
@@ -41,8 +41,8 @@ class DiaryDetailViewModel(
             } else {
                 diaryRepository.updateDiary(diary)
             }
-            uiState.editing = false
             updateUiState(uiState.diary)
+            updateEditing(false)
         }
     }
 
@@ -50,8 +50,16 @@ class DiaryDetailViewModel(
         uiState = uiState.copy(diary = diary, canSave = validateInput(diary))
     }
 
+    fun updateEditing(editing: Boolean) {
+        uiState = uiState.copy(editing = editing)
+    }
+
     fun validateInput(diary: Diary): Boolean {
         return diary.title.isNotBlank() && diary.content.isNotBlank()
+    }
+    
+    fun showDatePicker(show: Boolean) {
+        uiState = uiState.copy(showDatePicker = show)
     }
 
 }
@@ -60,5 +68,6 @@ data class DiaryDetailUiState(
     val diary: Diary = Diary(0, "", "", "", "", "", Date()),
     var editing: Boolean = false,
     var newDiary: Boolean = false,
-    var canSave: Boolean = false
+    var canSave: Boolean = false,
+    var showDatePicker: Boolean = false,
 )

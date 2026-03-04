@@ -9,9 +9,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-class HomeViewModel(private val diaryRepository: DiaryRepository) : ViewModel() {
+class HomeViewModel(diaryRepository: DiaryRepository) : ViewModel() {
     val homeUiState: StateFlow<HomeUiState> = diaryRepository.getAllDairiesStream()
-        .map { HomeUiState(it) }
+        .map { HomeUiState(diaries = it, loading = false) }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
@@ -21,5 +21,6 @@ class HomeViewModel(private val diaryRepository: DiaryRepository) : ViewModel() 
 }
 
 data class HomeUiState(
-    val diaries: List<Diary> = listOf()
+    val diaries: List<Diary> = listOf(),
+    var loading: Boolean = true
 )

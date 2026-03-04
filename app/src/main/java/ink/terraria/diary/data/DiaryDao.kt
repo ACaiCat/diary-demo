@@ -20,7 +20,7 @@ interface DiaryDao {
     suspend fun delete(diary: Diary)
 
     @Query("SELECT * FROM diaries WHERE id = :id")
-    fun getDiary(id: Int): Diary
+    suspend fun getDiary(id: Int): Diary
 
     @Query("SELECT * FROM diaries ORDER BY date DESC")
     fun getAllDairies(): Flow<List<Diary>>
