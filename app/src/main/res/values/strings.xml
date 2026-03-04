@@ -4,7 +4,7 @@
     <string name="local_datetime">yyyy年MM月dd日</string>
 
     <string name="delete_diary">删除日记</string>
-    <string name="delete_diary_message">确定要删除这篇日记吗？此操作不可撤销。</string>
+    <string name="delete_diary_tip">确定要删除这篇日记吗？</string>
 
     <string name="delete">删除</string>
     <string name="cancel">取消</string>
@@ -55,4 +55,7 @@
     <string name="failed_to_get_location">获取位置失败!</string>
     <string name="failed_to_get_weather">获取天气失败!</string>
     <string name="weather_auto_fetched">天气已自动获取: %1$s</string>
+    <string name="search">搜索</string>
+    <string name="search_diary">搜索日记…</string>
+    <string name="close_search">关闭搜索</string>
 </resources>

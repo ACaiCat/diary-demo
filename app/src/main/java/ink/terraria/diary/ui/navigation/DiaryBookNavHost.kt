@@ -3,8 +3,10 @@ package ink.terraria.diary.ui.navigation
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -33,7 +35,8 @@ fun DiaryBookNavHost(
             popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
         ) {
             HomeScreen(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
+                    .padding(horizontal = 8.dp),
                 navigateToNewDiary = {
                     navController.navigate("${DiaryDetailDestination.route}/0/true")
                 },

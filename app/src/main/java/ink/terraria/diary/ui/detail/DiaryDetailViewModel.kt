@@ -74,6 +74,16 @@ class DiaryDetailViewModel(
         uiState = uiState.copy(showWeatherPicker = show)
     }
 
+    fun showDeleteAlert(show: Boolean) {
+        uiState = uiState.copy(showDeleteAlert = show)
+    }
+
+    fun deleteDiary() {
+        viewModelScope.launch {
+            diaryRepository.deleteDiary(uiState.diary)
+        }
+    }
+
 }
 
 data class DiaryDetailUiState(
@@ -84,5 +94,6 @@ data class DiaryDetailUiState(
     var showDatePicker: Boolean = false,
     var showPhotoPicker: Boolean = false,
     var showNetworkPhotoPicker: Boolean = false,
-    var showWeatherPicker: Boolean = false
+    var showWeatherPicker: Boolean = false,
+    var showDeleteAlert: Boolean = false
 )

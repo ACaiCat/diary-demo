@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.InsertPhoto
 import androidx.compose.material.icons.filled.Save
@@ -99,6 +100,9 @@ fun DiaryDetailScreen(
                 onSelectDateClick = { viewModel.showDatePicker(true) },
                 onInsertPhotoClick = { viewModel.showPhotoPicker(true) },
                 onPickWeatherClick = { viewModel.showWeatherPicker(true) },
+                onDeleteClick = {
+                    viewModel.showDeleteAlert(true)
+                },
                 navigationBack = navigationBack
             )
 
@@ -132,6 +136,12 @@ fun DiaryDetailScreen(
                 viewModel.showWeatherPicker(false)
                 viewModel.updateUiState(uiState.diary.copy(weather = it))
             },
+            onDiaryDeleteConfirm = {
+                viewModel.showDeleteAlert(false)
+                viewModel.deleteDiary()
+                navigationBack()
+            },
+           onDiaryDeleteDismiss = { viewModel.showDeleteAlert(false) },
             modifier = Modifier
                 .padding(
                     top = paddingValues.calculateTopPadding(),
@@ -205,6 +215,7 @@ fun DetailTopBar(
     onSelectDateClick: () -> Unit,
     onInsertPhotoClick: () -> Unit,
     onPickWeatherClick: () -> Unit,
+    onDeleteClick: () -> Unit,
     navigationBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -254,6 +265,12 @@ fun DetailTopBar(
                 )
             }
         } else {
+            IconButton(onClick = onDeleteClick) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(R.string.delete)
+                )
+            }
             IconButton(onClick = onEditClick) {
                 Icon(
                     imageVector = Icons.Default.Edit,
@@ -277,6 +294,8 @@ fun DiaryDetailBody(
     onNetworkPhotoConfirm: (String) -> Unit,
     onWeatherEditDismiss: () -> Unit,
     onWeatherEditConfirm: (String) -> Unit,
+    onDiaryDeleteConfirm: () -> Unit,
+    onDiaryDeleteDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
@@ -311,11 +330,40 @@ fun DiaryDetailBody(
                 onWeatherEditConfirm = onWeatherEditConfirm
             )
         }
+
+        if (uiState.showDeleteAlert) {
+            DiaryDeleteAlert(
+                onDeleteConfirm = onDiaryDeleteConfirm,
+                onDeleteDismiss = onDiaryDeleteDismiss
+            )
+        }
+
         DiaryEditField(
             uiState = uiState,
             onDiaryChange = onDiaryChange,
         )
     }
+}
+
+@Composable
+fun DiaryDeleteAlert(
+    onDeleteConfirm: () -> Unit,
+    onDeleteDismiss: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AlertDialog(onDismissRequest = onDeleteDismiss, title = {
+        Text(stringResource(R.string.delete_diary))
+    }, text = {
+        Text(stringResource(R.string.delete_diary_tip))
+    }, confirmButton = {
+        TextButton(onClick = onDeleteConfirm) {
+            Text(stringResource(R.string.confirm))
+        }
+    }, dismissButton = {
+        TextButton(onClick = onDeleteDismiss) {
+            Text(stringResource(R.string.cancel))
+        }
+    }, modifier = modifier)
 }
 
 
@@ -489,5 +537,6 @@ fun DetailTopBarPreview() {
         onSelectDateClick = {},
         onInsertPhotoClick = {},
         navigationBack = {},
-        onPickWeatherClick = {})
+        onPickWeatherClick = {},
+        onDeleteClick = {},)
 }
