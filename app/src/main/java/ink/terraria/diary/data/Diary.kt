@@ -10,7 +10,7 @@ data class Diary(
     val id: Int,
     val title: String,
     val content: String,
-    val localPath: String,
+    val imagePath: String,
     val imageUrl: String,
     val weather: String,
     val date: Date

@@ -16,7 +16,7 @@ val diaries = listOf(
                 "尽管游戏中的战斗体验和我们之前在烧机系列游戏所见到的没有多大差别，但游戏中各类精心设计的敌人以及Boss战已然将战斗抬高到了一个全新的水平。" +
                 "就和几年前的《塞尔达传说》一样，《原神》也是一款能够推动同类游戏向前发展的优秀作品。",
         imageUrl = "",
-        localPath = "",
+        imagePath = "",
         weather = "晴",
         date = Date()
     ),
@@ -30,7 +30,7 @@ val diaries = listOf(
                 "即便在经历了5000次巡猎副本后，游戏仍有未解的星神之谜。它不仅是一款回合制游戏，更是能够推动人类文明向星际迈进的伟大杰作。",
         imageUrl = "",
         weather = "多云",
-        localPath = "",
+        imagePath = "",
         date = Date()
     ),
     Diary(
@@ -43,7 +43,7 @@ val diaries = listOf(
                 "《鸣潮》是库洛最具野心的作品，它不仅是在做游戏，而是在重塑动作游戏的工业标准。如果你觉得不好玩，那一定是你的声骸词条不够完美。",
         imageUrl = "",
         weather = "阵雨",
-        localPath = "",
+        imagePath = "",
         date = Date()
     ),
     Diary(
@@ -56,7 +56,7 @@ val diaries = listOf(
                 "这不仅仅是一次走格子，这是一场视听感官的核爆。即便在经历了1000小时的受击反馈测试后，我依然沉迷于那种打击感不能自拔。",
         imageUrl = "",
         weather = "晴",
-        localPath = "",
+        imagePath = "",
         date = Date()
     ),
     Diary(
@@ -69,7 +69,7 @@ val diaries = listOf(
                 "它是对自动化的极致探索。正如当年的工业革命一样，《终末地》是一款能够推动玩家大脑升级的划时代神作。",
         imageUrl = "",
         weather = "阴",
-        localPath = "",
+        imagePath = "",
         date = Date(),
     )
 )

@@ -1,27 +1,47 @@
 <resources>
     <string name="app_name">日记</string>
-    <string name="empty_diary_book">要不写点什么?</string>
-    <string name="local_datetime">yyyy年MM月dd日"</string>
+    <string name="empty_diary_book">记下此刻的想法…</string>
+    <string name="local_datetime">yyyy年MM月dd日</string>
+
     <string name="delete_diary">删除日记</string>
-    <string name="delete_diary_message">真的要删除这篇日记吗?</string>
+    <string name="delete_diary_message">确定要删除这篇日记吗？此操作不可撤销。</string>
+
     <string name="delete">删除</string>
     <string name="cancel">取消</string>
     <string name="confirm">确认</string>
-    <string name="diary_title_hint">标题</string>
-    <string name="diary_content_hint">内容</string>
+
+    <string name="diary_title_hint">给今天起个标题…</string>
+    <string name="diary_content_hint">写点什么吧…</string>
     <string name="save">保存</string>
+
     <string name="edit_diary">编辑日记</string>
-    <string name="add_diary">添加日记</string>
+    <string name="add_diary">新建日记</string>
+
     <string name="diary_deleted">日记已删除</string>
-    <string name="diary_saved">日记已保存</string>
+    <string name="diary_saved">日记已妥善保存</string>
+
     <string name="diary">日记</string>
     <string name="title">标题</string>
     <string name="content">内容</string>
-    <string name="content_tip">要不写点什么?"</string>
+    <string name="content_tip">在这里记录你的故事…</string>
+
+    <string name="diary_photo">日记插图</string>
+    <string name="delete_photo">删除图片</string>
+    <string name="delete_photo_tip">确定要移除这张图片吗？</string>
+
     <string name="menu">菜单</string>
     <string name="back">返回</string>
     <string name="edit">编辑</string>
+
     <string name="insert_photo">插入图片</string>
+    <string name="replace_photo">更换图片</string>
+    <string name="network_photo">网络图片</string>
+    <string name="local_photo">本地相册</string>
+
+    <string name="network_photo_tip">请粘贴图片链接 (URL)</string>
+    <string name="network_photo_url">图片链接 (URL)</string>
+    <string name="pick_photo_tip">选择图片来源</string>
+
     <string name="select_date">选择日期</string>
-    <string name="weather">天气</string>
+    <string name="weather">天气状况</string>
 </resources>

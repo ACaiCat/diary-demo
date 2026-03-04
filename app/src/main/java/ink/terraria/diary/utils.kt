@@ -13,3 +13,7 @@ fun Date.toLocalString(): String {
         Locale.getDefault()
     ).format(this)
 }
+
+fun isHttpUrl(path: String): Boolean {
+    return path.startsWith("http://") || path.startsWith("https://")
+}

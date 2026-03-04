@@ -62,6 +62,14 @@ class DiaryDetailViewModel(
         uiState = uiState.copy(showDatePicker = show)
     }
 
+    fun showPhotoPicker(show: Boolean) {
+        uiState = uiState.copy(showPhotoPicker = show)
+    }
+
+    fun showNetworkPhotoPicker(show: Boolean) {
+        uiState = uiState.copy(showNetworkPhotoPicker = show)
+    }
+
 }
 
 data class DiaryDetailUiState(
@@ -70,4 +78,6 @@ data class DiaryDetailUiState(
     var newDiary: Boolean = false,
     var canSave: Boolean = false,
     var showDatePicker: Boolean = false,
+    var showPhotoPicker: Boolean = false,
+    var showNetworkPhotoPicker: Boolean = false
 )

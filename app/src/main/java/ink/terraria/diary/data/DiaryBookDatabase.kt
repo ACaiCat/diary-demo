@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
-@Database(entities = [Diary::class], version = 3, exportSchema = false)
+@Database(entities = [Diary::class], version = 4, exportSchema = false)
 @TypeConverters(DateConverter::class)
 abstract class DiaryBookDatabase : RoomDatabase() {
     abstract fun diaryDao(): DiaryDao
