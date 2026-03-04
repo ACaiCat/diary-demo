@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import ink.terraria.diary.data.Diary
 import ink.terraria.diary.data.DiaryRepository
+import ink.terraria.diary.network.WeatherApi
 import kotlinx.coroutines.launch
 import java.util.Date
 
@@ -70,6 +71,10 @@ class DiaryDetailViewModel(
         uiState = uiState.copy(showNetworkPhotoPicker = show)
     }
 
+    fun showWeatherPicker(show: Boolean) {
+        uiState = uiState.copy(showWeatherPicker = show)
+    }
+
 }
 
 data class DiaryDetailUiState(
@@ -79,5 +84,6 @@ data class DiaryDetailUiState(
     var canSave: Boolean = false,
     var showDatePicker: Boolean = false,
     var showPhotoPicker: Boolean = false,
-    var showNetworkPhotoPicker: Boolean = false
+    var showNetworkPhotoPicker: Boolean = false,
+    var showWeatherPicker: Boolean = false
 )

@@ -1,6 +1,11 @@
 package ink.terraria.diary.ui.detail
 
+import android.Manifest
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.LocationManager
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -46,6 +51,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -60,11 +66,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import ink.terraria.diary.R
 import ink.terraria.diary.data.Diary
 import ink.terraria.diary.isHttpUrl
+import ink.terraria.diary.network.Now
+import ink.terraria.diary.network.WeatherApi
 import ink.terraria.diary.toLocalString
 import ink.terraria.diary.ui.AppViewModelProvider
 import ink.terraria.diary.ui.navigation.NavigationDestination
@@ -87,6 +96,67 @@ fun DiaryDetailScreen(
     viewModel: DiaryDetailViewModel = viewModel(factory = AppViewModelProvider.factory)
 ) {
     val uiState = viewModel.uiState
+    val context = LocalContext.current
+    val weatherLangCode = stringResource(R.string.weather_lang_code)
+    val weatherAutoFetchedText = stringResource(R.string.weather_auto_fetched)
+
+    if (viewModel.newDiary) {
+        val hasLocationPermission = remember {
+            mutableStateOf(
+                ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            )
+        }
+        val launcher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { granted ->
+            if (granted) {
+                hasLocationPermission.value = true
+            }
+        }
+        LaunchedEffect(hasLocationPermission.value) {
+            if (!hasLocationPermission.value) {
+                launcher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+                return@LaunchedEffect
+            }
+            val locationManager =
+                context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            if (ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                return@LaunchedEffect
+            }
+            try {
+                val location =
+                    locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+                        ?: locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                        ?: locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
+                if (location != null) {
+                    val weatherResponse = WeatherApi.weatherApiService.getCurrentWeather(
+                        "${"%.2f".format(location.longitude)},${"%.2f".format(location.latitude)}",
+                        weatherLangCode
+                    )
+                    val weatherText = weatherResponse.now.text
+                    viewModel.updateUiState(uiState.diary.copy(weather = weatherText))
+                    Toast.makeText(
+                        context,
+                        weatherAutoFetchedText.format(weatherText),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -96,6 +166,7 @@ fun DiaryDetailScreen(
                 onEditClick = { viewModel.updateEditing(true) },
                 onSelectDateClick = { viewModel.showDatePicker(true) },
                 onInsertPhotoClick = { viewModel.showPhotoPicker(true) },
+                onPickWeatherClick = { viewModel.showWeatherPicker(true) },
                 navigationBack = navigationBack
             )
 
@@ -124,6 +195,11 @@ fun DiaryDetailScreen(
                 viewModel.showPhotoPicker(false)
                 viewModel.showNetworkPhotoPicker(true)
             },
+            onWeatherEditDismiss = { viewModel.showWeatherPicker(false) },
+            onWeatherEditConfirm = {
+                viewModel.showWeatherPicker(false)
+                viewModel.updateUiState(uiState.diary.copy(weather = it))
+            },
             modifier = Modifier
                 .padding(
                     top = paddingValues.calculateTopPadding(),
@@ -145,6 +221,7 @@ fun DetailTopBar(
     onEditClick: () -> Unit,
     onSelectDateClick: () -> Unit,
     onInsertPhotoClick: () -> Unit,
+    onPickWeatherClick: () -> Unit,
     navigationBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -186,7 +263,7 @@ fun DetailTopBar(
                         contentDescription = stringResource(R.string.select_date)
                     )
                 }
-                IconButton(onClick = {}) {
+                IconButton(onClick = onPickWeatherClick) {
                     Icon(
                         imageVector = Icons.Default.WbSunny,
                         contentDescription = stringResource(R.string.weather)
@@ -228,11 +305,13 @@ fun DiaryDetailBody(
     onLocalPhotoConfirm: (String) -> Unit,
     onNetworkPhotoRequest: () -> Unit,
     onNetworkPhotoConfirm: (String) -> Unit,
+    onWeatherEditDismiss: () -> Unit,
+    onWeatherEditConfirm: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         if (uiState.showDatePicker) {
-            DiaryDateSelector(
+            DiaryDatePicker(
                 uiState = uiState,
                 onDateEditDismiss = onDateEditDismiss,
                 onDateEditConfirm = onDateEditConfirm
@@ -256,6 +335,12 @@ fun DiaryDetailBody(
             )
         }
 
+        if (uiState.showWeatherPicker) {
+            WeatherPicker(
+                onWeatherEditDismiss = onWeatherEditDismiss,
+                onWeatherEditConfirm = onWeatherEditConfirm
+            )
+        }
         DiaryEditField(
             uiState = uiState,
             onDiaryChange = onDiaryChange,
@@ -263,140 +348,6 @@ fun DiaryDetailBody(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PhotoPicker(
-    uiState: DiaryDetailUiState,
-    onPhotoEditDismiss: () -> Unit,
-    onPhotoEditConfirm: (String) -> Unit,
-    onNetworkPhotoRequest: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val context = LocalContext.current
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri ->
-        uri?.let {
-            context.contentResolver.takePersistableUriPermission(
-                it,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION
-            )
-            onPhotoEditConfirm(it.toString())
-        }
-    }
-
-    AlertDialog(
-        modifier = modifier,
-        onDismissRequest = onPhotoEditDismiss,
-        title = {
-            if (uiState.diary.imageUrl.isEmpty() && uiState.diary.imagePath.isEmpty()) {
-                Text(stringResource(R.string.insert_photo))
-            } else {
-                Text(stringResource(R.string.replace_photo))
-            }
-        },
-        text = { Text(stringResource(R.string.pick_photo_tip)) },
-        confirmButton = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = {
-                    launcher.launch("image/*")
-                }) {
-                    Text(stringResource(R.string.local_photo))
-                }
-                TextButton(onClick = {
-                    onNetworkPhotoRequest()
-                }) {
-                    Text(stringResource(R.string.network_photo))
-                }
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onPhotoEditDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
-    )
-}
-
-@Composable
-fun NetWorkPhotoPicker(
-    uiState: DiaryDetailUiState,
-    onPhotoEditDismiss: () -> Unit,
-    onPhotoEditConfirm: (String) -> Unit,
-    modifier: Modifier = Modifier
-) {
-
-    var imgUrl by remember { mutableStateOf(uiState.diary.imageUrl) }
-    AlertDialog(
-        modifier = modifier,
-        onDismissRequest = onPhotoEditDismiss,
-        title = {
-            Text(stringResource(R.string.network_photo))
-        },
-        text = {
-            TextField(
-                value = imgUrl,
-                onValueChange = {
-                    imgUrl = it
-                },
-                placeholder = { Text(stringResource(R.string.network_photo_tip)) },
-                label = { Text(stringResource(R.string.network_photo_url)) },
-                isError = !isHttpUrl(imgUrl),
-                singleLine = true,
-                maxLines = 1
-            )
-        },
-        confirmButton = {
-            TextButton(
-                enabled = isHttpUrl(imgUrl),
-                onClick = {
-                    onPhotoEditConfirm(imgUrl)
-                }) {
-                Text(stringResource(R.string.confirm))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onPhotoEditDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
-    )
-}
-
-@Composable
-fun DiaryDateSelector(
-    uiState: DiaryDetailUiState,
-    onDateEditDismiss: () -> Unit,
-    onDateEditConfirm: (Date) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val timePickerState = rememberDatePickerState()
-    DatePickerDialog(
-        modifier = modifier,
-        onDismissRequest = onDateEditDismiss,
-        dismissButton = {
-            TextButton(onClick = onDateEditDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = {
-                onDateEditConfirm(
-                    timePickerState.selectedDateMillis?.let { Date(it) }
-                        ?: uiState.diary.date
-                )
-            }) {
-                Text(stringResource(R.string.confirm))
-            }
-        },
-    ) {
-        DatePicker(
-            state = timePickerState,
-            modifier = Modifier.verticalScroll(rememberScrollState())
-        )
-    }
-}
 
 @Composable
 fun DiaryEditField(
@@ -436,11 +387,28 @@ fun DiaryEditField(
             }
         )
 
-        Text(
-            text = uiState.diary.date.toLocalString(),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        Row {
+            Text(
+                text = uiState.diary.date.toLocalString(),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            if (uiState.diary.weather.isNotEmpty()) {
+                Text(
+                    text = " | ",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = uiState.diary.weather,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+        }
+
 
         BasicTextField(
             value = uiState.diary.content,
@@ -482,7 +450,7 @@ fun DiaryPhoto(
     onDiaryChange: (Diary) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val showPhotoDeleteAlert = remember { mutableStateOf(false) }
+    val showPhotoDeleteAlert = remember(uiState.diary.id) { mutableStateOf(false) }
 
     if (!uiState.diary.imageUrl.isEmpty() || !uiState.diary.imagePath.isEmpty()) {
         Box(
@@ -560,5 +528,6 @@ fun DetailTopBarPreview() {
         onSelectDateClick = {},
         onInsertPhotoClick = {},
         navigationBack = {},
+        onPickWeatherClick = {}
     )
 }
