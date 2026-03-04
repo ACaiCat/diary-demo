@@ -36,8 +36,9 @@ class DiaryDetailViewModel(
     fun saveDiary(diary: Diary) {
         viewModelScope.launch {
             if (newDiary) {
-                diaryRepository.insertDiary(diary)
-                uiState.newDiary = false
+                val id = diaryRepository.insertDiary(diary)
+                newDiary = false
+                uiState = uiState.copy(diary = uiState.diary.copy(id = id.toInt()), newDiary = false)
             } else {
                 diaryRepository.updateDiary(diary)
             }

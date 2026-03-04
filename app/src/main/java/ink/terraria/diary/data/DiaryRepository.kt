@@ -3,7 +3,7 @@ package ink.terraria.diary.data
 import kotlinx.coroutines.flow.Flow
 
 interface DiaryRepository {
-    suspend fun insertDiary(diary: Diary)
+    suspend fun insertDiary(diary: Diary): Long
 
     suspend fun updateDiary(diary: Diary)
 
