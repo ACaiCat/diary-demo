@@ -61,22 +61,7 @@ fun HomeScreen(
     Scaffold(
         contentWindowInsets = WindowInsets(0),
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.app_name),
-                            style = MaterialTheme.typography.headlineLarge,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .padding(top = 8.dp, bottom = 12.dp)
-                        )
-
-
-                    }
-                }
-            )
+            HomeBar()
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
@@ -237,6 +222,27 @@ fun SearchBar(
             .padding(bottom = 8.dp),
     ) {}
 
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeBar(
+    modifier: Modifier = Modifier
+) {
+    TopAppBar(
+        title = {
+            Column {
+                Text(
+                    text = stringResource(R.string.app_name),
+                    style = MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .padding(top = 8.dp, bottom = 12.dp)
+                )
+            }
+        }
+    )
 }
 
 
