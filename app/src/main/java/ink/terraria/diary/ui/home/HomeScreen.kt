@@ -3,6 +3,7 @@ package ink.terraria.diary.ui.home
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
@@ -162,11 +163,26 @@ fun Diary(
                 style = MaterialTheme.typography.headlineMedium
             )
 
-            Text(
-                text = diary.date.toLocalString(),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Row {
+                Text(
+                    text = diary.date.toLocalString(),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (diary.weather.isNotEmpty()) {
+                    Text(
+                        text = " | ",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = diary.weather,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
