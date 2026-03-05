@@ -7,6 +7,7 @@ import android.location.LocationManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -390,11 +391,11 @@ fun DiaryEditField(
 
     Column(
         modifier = modifier
+            //.background(Color.Green)
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-
         BasicTextField(
             value = uiState.diary.title,
             onValueChange = {
@@ -465,8 +466,6 @@ fun DiaryEditField(
                 }
             },
             modifier = Modifier
-                .fillMaxSize()
-                .weight(1f, fill = true)
                 .focusRequester(focusRequester)
         )
 
@@ -476,7 +475,18 @@ fun DiaryEditField(
             modifier = Modifier.padding(top = 4.dp)
         )
 
-        Spacer(Modifier.padding(vertical = 16.dp))
+        Spacer(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .clickable(
+                    enabled = uiState.editing,
+                    indication = null,
+                    interactionSource = null
+                ) {
+                    focusRequester.requestFocus()
+                    keyboardController?.show()
+                })
     }
 }
 
