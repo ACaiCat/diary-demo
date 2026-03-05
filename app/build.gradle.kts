@@ -12,6 +12,20 @@ val localProperties = Properties().apply {
     if (file.exists()) load(file.inputStream())
 }
 
+fun getVersionName(): String {
+    return try {
+        val process = ProcessBuilder("git", "describe", "--tags", "--abbrev=0")
+            .directory(rootProject.projectDir)
+            .redirectErrorStream(true)
+            .start()
+        process.inputStream.bufferedReader().readText().trim().also {
+            process.waitFor()
+        }.ifEmpty { "1.0.0" }
+    } catch (_: Exception) {
+        "1.0.0"
+    }
+}
+
 android {
     namespace = "ink.terraria.diary"
     compileSdk {
@@ -24,7 +38,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = getVersionName()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
