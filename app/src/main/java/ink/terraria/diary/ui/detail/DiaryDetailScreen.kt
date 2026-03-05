@@ -51,9 +51,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -141,7 +144,7 @@ fun DiaryDetailScreen(
                 viewModel.deleteDiary()
                 navigationBack()
             },
-           onDiaryDeleteDismiss = { viewModel.showDeleteAlert(false) },
+            onDiaryDeleteDismiss = { viewModel.showDeleteAlert(false) },
             modifier = Modifier
                 .padding(
                     top = paddingValues.calculateTopPadding(),
@@ -341,6 +344,7 @@ fun DiaryDetailBody(
         DiaryEditField(
             uiState = uiState,
             onDiaryChange = onDiaryChange,
+            autoFocus = uiState.newDiary
         )
     }
 }
@@ -369,8 +373,20 @@ fun DiaryDeleteAlert(
 
 @Composable
 fun DiaryEditField(
-    uiState: DiaryDetailUiState, onDiaryChange: (Diary) -> Unit, modifier: Modifier = Modifier
+    uiState: DiaryDetailUiState,
+    onDiaryChange: (Diary) -> Unit,
+    autoFocus: Boolean,
+    modifier: Modifier = Modifier
 ) {
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    LaunchedEffect(autoFocus) {
+        if (autoFocus) {
+            focusRequester.requestFocus()
+            keyboardController?.show()
+        }
+    }
 
     Column(
         modifier = modifier
@@ -447,7 +463,12 @@ fun DiaryEditField(
                     }
                     innerTextField()
                 }
-            })
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f, fill = true)
+                .focusRequester(focusRequester)
+        )
 
         DiaryPhoto(
             uiState = uiState,
@@ -538,5 +559,6 @@ fun DetailTopBarPreview() {
         onInsertPhotoClick = {},
         navigationBack = {},
         onPickWeatherClick = {},
-        onDeleteClick = {},)
+        onDeleteClick = {},
+    )
 }
